@@ -2,78 +2,127 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LINEUP SQUAD EDIT</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lineup Reel Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg:#09120e;--panel:#14251c;--line:#34533e;--accent:#b9f477;--muted:#a7b8aa}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f4f7f2;font:16px system-ui,Arial,sans-serif}
-header{padding:24px max(18px,calc((100% - 1050px)/2));background:#102017;border-bottom:1px solid var(--line)}
-h1{margin:0;font-size:clamp(24px,4vw,36px);letter-spacing:1px}h1 span{color:var(--accent)}header p{margin:6px 0 0;color:var(--muted)}
-main{max-width:1050px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns:1.3fr .7fr;gap:18px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
-.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
-select,input,button{font:inherit;border-radius:9px;padding:10px;background:#0b1710;color:white;border:1px solid var(--line)}
-button{cursor:pointer}button.primary{background:var(--accent);color:#14200d;font-weight:800;border-color:var(--accent)}
-.pitch{background:repeating-linear-gradient(0deg,#23613c 0 68px,#1e5736 68px 136px);border:2px solid #b5d59c;border-radius:12px;padding:20px 8px;min-height:500px;display:flex;flex-direction:column;justify-content:space-around;gap:12px;position:relative}
-.pitch:before{content:"";position:absolute;top:50%;left:0;right:0;border-top:2px solid #ffffff80}
-.line{display:flex;justify-content:space-evenly;gap:4px;position:relative;z-index:1}
-.slot{width:78px;min-height:80px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:2px}
-.shirt{width:42px;height:42px;border-radius:12px;background:var(--accent);color:#14200d;display:grid;place-items:center;font-weight:900;border:2px solid white}
-.slot small,.slot strong{text-shadow:0 1px 3px #000;font-size:11px}.slot strong{max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fields{display:grid;gap:10px}.fields label{display:grid;gap:5px;color:var(--muted);font-size:13px}.fields input{width:100%}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.list{margin-top:16px;display:grid;gap:8px}.entry{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px;background:#0b1710;border:1px solid var(--line);border-radius:9px;font-size:13px}
-.hint{color:var(--muted);font-size:13px}footer{text-align:center;padding:10px 16px 28px;color:var(--muted);font-size:12px}
-@media(max-width:760px){main{grid-template-columns:1fr;margin:14px auto}.pitch{min-height:460px}.slot{width:66px}.shirt{width:36px;height:36px}}
+:root{color-scheme:dark;--bg:#0a0a0a;--panel:#161616;--line:#2c2c2c;--fg:#f2f2f2;--mut:#9a9a9a;--acc:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:inherit}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px system-ui,Arial,sans-serif}
+header{padding:18px 20px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:22px;letter-spacing:2px}header p{margin:4px 0 0;color:var(--mut);font-size:13px}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;padding:16px;max-width:1300px;margin:auto}
+@media(max-width:820px){main{grid-template-columns:1fr}}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stage{position:sticky;top:8px;align-self:start}
+canvas{width:100%;max-height:70vh;object-fit:contain;background:#000;border-radius:8px;display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+button,select,input[type=text],input[type=number]{font:inherit;color:var(--fg);background:#0d0d0d;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+button{cursor:pointer}button.p{background:#fff;color:#000;font-weight:700;border-color:#fff}button:disabled{opacity:.5}
+input[type=range]{flex:1;min-width:120px}
+label.s{display:flex;flex-direction:column;gap:3px;color:var(--mut);font-size:12px}
+.topic{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px;background:#0f0f0f}
+.topic input[type=text]{flex:1;min-width:100px;font-weight:700;text-transform:uppercase}
+.th{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.t{position:relative;width:64px;height:64px;background:#000;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.t img,.t video{width:100%;height:100%;object-fit:contain;filter:grayscale(1)}
+.t b{position:absolute;top:0;right:0;background:#000c;color:#fff;cursor:pointer;padding:0 5px;font-size:13px}
+.t i{position:absolute;left:0;bottom:0;background:#000b;font-size:9px;padding:1px 3px;font-style:normal}
+.hint{color:var(--mut);font-size:12px;margin:6px 0 0}
+#msg{color:#ffd166;font-size:13px;margin-top:8px;min-height:18px}
 </style>
 </head>
 <body>
-<header><h1>LINEUP <span>SQUAD EDIT</span></h1><p>Build and save your FC-style starting XI.</p></header>
+<header><h1>LINEUP REEL MAKER</h1><p>Add topics, drop in characters (PNG / JPG / MP4) &mdash; they slide in one by one and line up. Export as MP4.</p></header>
 <main>
-<section class="panel">
-<div class="toolbar"><label for="formation">Formation</label><select id="formation"><option>4-3-3 Attack</option><option>4-3-3 Holding</option><option>4-2-3-1</option><option>4-4-2</option><option>3-5-2</option><option>4-1-2-1-2</option></select><button id="clear">Clear squad</button></div>
-<div class="pitch" id="pitch" aria-label="Football formation pitch"></div>
-<p class="hint">Select any shirt to edit that position.</p>
-</section>
-<aside class="panel">
-<h2>Player editor</h2>
-<div class="fields">
-<label>Player name<input id="name" maxlength="24" placeholder="e.g. Mbappé"></label>
-<label>Position<input id="role" maxlength="5" placeholder="ST"></label>
-<label>Overall rating<input id="ovr" type="number" min="1" max="150" placeholder="100"></label>
-<label>Card / club note<input id="note" maxlength="40" placeholder="Optional"></label>
+<section class="box stage">
+<canvas id="cv" width="1920" height="1080"></canvas>
+<div class="row"><button id="play" class="p">&#9654; Play</button><input type="range" id="seek" min="0" max="1000" value="0"><span id="tm" class="hint">0.0s</span></div>
+<div class="row">
+<label class="s">Format<select id="fmt"><option value="land">Landscape 1920&times;1080</option><option value="short">Shorts 1080&times;1920</option></select></label>
+<label class="s">Seconds per character<input type="number" id="stag" value="0.7" min="0.2" max="3" step="0.1" style="width:90px"></label>
+<label class="s">Hold at end (s)<input type="number" id="hold" value="1.5" min="0" max="10" step="0.1" style="width:90px"></label>
 </div>
-<div class="actions"><button class="primary" id="save">Save player</button><button id="remove">Remove</button></div>
-<div id="list" class="list"></div>
-<p class="hint">Your squad saves automatically in this browser.</p>
-</aside>
+<div class="row">
+<label class="s">Style<select id="sty"><option value="bw">Black &amp; white</option><option value="col">Original colours</option></select></label>
+<label class="s">Background<select id="bgc"><option value="#000">Black</option><option value="#fff">White</option><option value="#0a1a0f">Dark green</option></select></label>
+<label class="s">Overlap<select id="ov"><option value="0.15">Light</option><option value="0.3" selected>Medium</option><option value="0.45">Heavy</option></select></label>
+</div>
+<div class="row"><button id="exp" class="p">&#11015; Export MP4</button><span class="hint" id="info"></span></div>
+<div id="msg"></div>
+<p class="hint">Keep this tab open and in front while exporting &mdash; it records in real time.</p>
+</section>
+<section class="box">
+<div class="row" style="margin:0 0 12px"><b>Topics</b><button id="add">+ Add topic</button></div>
+<div id="tp"></div>
+<p class="hint">Tip: transparent PNG cut-outs look best (like your reference). Short MP4s loop automatically.</p>
+</section>
 </main>
-<footer>Independent fan-made squad planner. Not affiliated with EA SPORTS.</footer>
 <script>
-"use strict";
-const formations={
-"4-3-3 Attack":[["LW","ST","RW"],["CAM"],["CM","CM"],["LB","CB","CB","RB"],["GK"]],
-"4-3-3 Holding":[["LW","ST","RW"],["CM","CDM","CM"],["LB","CB","CB","RB"],["GK"]],
-"4-2-3-1":[["ST"],["LAM","CAM","RAM"],["CDM","CDM"],["LB","CB","CB","RB"],["GK"]],
-"4-4-2":[["ST","ST"],["LM","CM","CM","RM"],["LB","CB","CB","RB"],["GK"]],
-"3-5-2":[["ST","ST"],["LM","CM","CAM","CM","RM"],["CB","CB","CB"],["GK"]],
-"4-1-2-1-2":[["ST","ST"],["CAM"],["CM","CM"],["CDM"],["LB","CB","CB","RB"],["GK"]]
-};
-const $=id=>document.getElementById(id);
-let squad={};let selected=null;
-try{squad=JSON.parse(localStorage.getItem("lineup-squad-edit")||"{}")||{}}catch{squad={}}
-function saveStorage(){try{localStorage.setItem("lineup-squad-edit",JSON.stringify(squad))}catch{alert("Browser storage is unavailable. Your changes may not persist after closing this page.")}}
-function escapeHTML(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function draw(){
- const formation=$("formation").value;const pitch=$("pitch");pitch.innerHTML="";let n=0;
- formations[formation].forEach(row=>{const line=document.createElement("div");line.className="line";row.forEach(pos=>{const id=formation+"-"+n++;const p=squad[id]||{};const button=document.createElement("button");button.className="slot";button.type="button";button.innerHTML='<span class="shirt">'+escapeHTML(p.ovr||pos)+'</span><small>'+escapeHTML(pos)+'</small><strong>'+escapeHTML(p.name||"Tap to add")+'</strong>';button.addEventListener("click",()=>select(id,pos));line.appendChild(button)});pitch.appendChild(line)});
- renderList();
-}
-function select(id,pos){selected=id;const p=squad[id]||{};$("name").value=p.name||"";$("role").value=p.role||pos;$("ovr").value=p.ovr||"";$("note").value=p.note||""}
-function renderList(){const list=$("list");const rows=Object.entries(squad).filter(([,p])=>p.name);list.innerHTML=rows.length?"":"<p class='hint'>No players added yet.</p>";rows.forEach(([id,p])=>{const row=document.createElement("div");row.className="entry";const label=document.createElement("span");label.textContent=p.name+" · "+(p.role||"POS")+(p.ovr?" · OVR "+p.ovr:"");const edit=document.createElement("button");edit.textContent="Edit";edit.addEventListener("click",()=>select(id,p.role));row.append(label,edit);list.appendChild(row)})}
-$("save").addEventListener("click",()=>{if(!selected){alert("Select a position on the pitch first.");return}const name=$("name").value.trim();if(!name){alert("Enter a player name.");return}squad[selected]={name,role:$("role").value.trim().toUpperCase()||"POS",ovr:$("ovr").value,note:$("note").value.trim()};saveStorage();draw()});
-$("remove").addEventListener("click",()=>{if(!selected)return;delete squad[selected];saveStorage();$("name").value=$("role").value=$("ovr").value=$("note").value="";draw()});
-$("clear").addEventListener("click",()=>{if(confirm("Remove all players from your squad?")){squad={};selected=null;saveStorage();draw()}});
-$("formation").addEventListener("change",()=>{selected=null;draw()});
-draw();
+const cv=document.getElementById('cv'),cx=cv.getContext('2d'),$=id=>document.getElementById(id);
+const ENT=0.55,EXI=0.45,FONT='"Cinzel Decorative",Georgia,serif';
+let topics=[{name:'Attackers',items:[]}],playing=false,t0=0,tNow=0,exporting=false;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const cfg=()=>({stag:+$('stag').value||.7,hold:+$('hold').value||0,bw:$('sty').value=='bw',bg:$('bgc').value,ov:+$('ov').value,short:$('fmt').value=='short'});
+function sched(){const c=cfg();let s=0;const a=[];topics.forEach(tp=>{if(!tp.items.length)return;const d=tp.items.length*c.stag+ENT+c.hold+EXI;a.push({tp,s,d});s+=d});return{a,total:s}}
+function addFiles(tp,files){[...files].forEach(f=>{const url=URL.createObjectURL(f),it={name:f.name,url,vid:f.type.startsWith('video')};
+ if(it.vid){const v=document.createElement('video');v.muted=true;v.loop=true;v.playsInline=true;v.src=url;v.onloadedmetadata=()=>{it.w=v.videoWidth;it.h=v.videoHeight;v.play().catch(()=>{});ui()};it.el=v}
+ else{const im=new Image();im.onload=()=>{it.w=im.naturalWidth;it.h=im.naturalHeight;ui()};im.src=url;it.el=im}
+ tp.items.push(it)});ui()}
+function ui(){const box=$('tp');box.innerHTML='';topics.forEach((tp,ti)=>{const d=document.createElement('div');d.className='topic';
+ d.innerHTML='<div class="row" style="margin:0"><input type="text" value="'+tp.name.replace(/"/g,'&quot;')+'" placeholder="Topic name"><label class="p" style="cursor:pointer;padding:8px 10px;border-radius:8px;background:#fff;color:#000;font-weight:700">+ Files<input type="file" multiple accept="image/*,video/mp4,video/*" hidden></label><button data-a="up">&#9650;</button><button data-a="dn">&#9660;</button><button data-a="del">Delete</button></div><div class="th"></div>';
+ d.querySelector('input[type=text]').oninput=e=>{tp.name=e.target.value};
+ d.querySelector('input[type=file]').onchange=e=>{addFiles(tp,e.target.files)};
+ d.querySelector('[data-a=up]').onclick=()=>{if(ti>0){[topics[ti-1],topics[ti]]=[topics[ti],topics[ti-1]];ui()}};
+ d.querySelector('[data-a=dn]').onclick=()=>{if(ti<topics.length-1){[topics[ti+1],topics[ti]]=[topics[ti],topics[ti+1]];ui()}};
+ d.querySelector('[data-a=del]').onclick=()=>{topics.splice(ti,1);ui()};
+ const th=d.querySelector('.th');tp.items.forEach((it,ii)=>{const t=document.createElement('div');t.className='t';
+  const m=document.createElement(it.vid?'video':'img');m.src=it.url;if(it.vid){m.muted=true;m.loop=true;m.autoplay=true;m.playsInline=true}t.appendChild(m);
+  const n=document.createElement('i');n.textContent=ii+1;t.appendChild(n);
+  const x=document.createElement('b');x.textContent='×';x.onclick=()=>{tp.items.splice(ii,1);ui()};t.appendChild(x);th.appendChild(t)});
+ box.appendChild(d)});
+ const s=sched();$('info').textContent=s.total?('Length: '+s.total.toFixed(1)+'s'):'Add characters to begin'}
+$('add').onclick=()=>{topics.push({name:'New topic',items:[]});ui()};
+function setSize(){const c=cfg();cv.width=c.short?1080:1920;cv.height=c.short?1920:1080}
+function drawTitle(tx,W,H,c,a,lt){if(a<=0||!tx)return;const fs=W*(c.short?.085:.052);cx.save();cx.font='700 '+fs+'px '+FONT;cx.textAlign='center';cx.textBaseline='middle';
+ let tt=tx.toUpperCase();while(cx.measureText(tt).width>W*.9&&fs>10){cx.font='700 '+(fs*=.92)+'px '+FONT}
+ const y=H*(c.short?.69:.78),burst=lt<.45||Math.random()<.04,d=(burst?6+Math.random()*8:2.5)*W/1920,jx=burst?(Math.random()-.5)*14*W/1920:0;
+ cx.globalAlpha=a;const col=c.bg=='#fff';
+ cx.globalCompositeOperation=col?'multiply':'lighter';cx.fillStyle='#ff2a4d';cx.fillText(tt,W/2-d+jx,y);cx.fillStyle='#22d3ff';cx.fillText(tt,W/2+d+jx,y);
+ cx.globalCompositeOperation='source-over';cx.fillStyle=col?'#000':'#fff';cx.fillText(tt,W/2+jx,y);cx.restore()}
+function draw(t){const W=cv.width,H=cv.height,c=cfg();cx.globalAlpha=1;cx.filter='none';cx.fillStyle=c.bg;cx.fillRect(0,0,W,H);
+ const s=sched();if(!s.a.length){cx.fillStyle='#777';cx.font='28px system-ui';cx.textAlign='center';cx.fillText('Add characters to a topic',W/2,H/2);return}
+ let seg=s.a.find(g=>t>=g.s&&t<g.s+g.d)||s.a[s.a.length-1];const lt=clamp(t-seg.s,0,seg.d),its=seg.tp.items.filter(i=>i.w);
+ const n=its.length,boxH=H*(c.short?.3:.5),k=1-c.ov;let ws=its.map(i=>boxH*i.w/i.h),hs=its.map(()=>boxH);
+ let tot=ws.reduce((a,w,i)=>a+(i<n-1?w*k:w),0),f=Math.min(1,W*.94/Math.max(tot,1));ws=ws.map(w=>w*f);hs=hs.map(h=>h*f);tot*=f;
+ let x=(W-tot)/2;const base=H*(c.short?.6:.68),ex=clamp((lt-(seg.d-EXI))/EXI,0,1);
+ its.forEach((it,i)=>{const w=ws[i],h=hs[i],p=clamp((lt-i*c.stag)/ENT,0,1),e=1-Math.pow(1-p,3),dir=i%2?1:-1;
+  if(p>0){let px=x+dir*(1-e)*W*.7+dir*ex*ex*W*.5;const a=p*(1-ex),bl=(1-e)*26*W/1920+ex*10;
+   cx.save();cx.globalAlpha=a;cx.filter=(c.bw?'grayscale(1) contrast(1.1) ':'')+(bl>.3?'blur('+bl.toFixed(1)+'px)':'');
+   try{cx.drawImage(it.el,px,base-h,w,h)}catch(_){}cx.restore()}
+  x+=w*k});
+ cx.filter='none';const ta=clamp(lt/.25,0,1)*(1-ex);drawTitle(seg.tp.name,W,H,c,ta,lt)}
+function loop(ts){if(playing){tNow=(ts-t0)/1000;const tot=sched().total;if(tNow>=tot){if(exporting)tNow=tot;else{tNow=0;t0=ts}}
+  $('seek').value=tot?tNow/tot*1000:0}
+ draw(tNow);$('tm').textContent=tNow.toFixed(1)+'s';requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+$('play').onclick=()=>{playing=!playing;$('play').innerHTML=playing?'&#10074;&#10074; Pause':'&#9654; Play';if(playing)t0=performance.now()-tNow*1000};
+$('seek').oninput=e=>{tNow=e.target.value/1000*sched().total;if(playing)t0=performance.now()-tNow*1000};
+['fmt','stag','hold','sty','bgc','ov'].forEach(id=>$(id).onchange=()=>{setSize();ui()});
+$('exp').onclick=async()=>{const m=$('msg'),tot=sched().total;if(!tot){m.textContent='Add some characters first.';return}
+ if(!window.MediaRecorder){m.textContent='Your browser cannot record video. Use Chrome or Edge on desktop.';return}
+ await document.fonts.load('700 40px "Cinzel Decorative"').catch(()=>{});
+ const types=['video/mp4;codecs=avc1.640028','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm'],mt=types.find(t=>MediaRecorder.isTypeSupported(t));
+ const mp4=mt&&mt.startsWith('video/mp4');
+ m.textContent=mp4?'Recording… ':'This browser can only save WebM (use latest Chrome/Edge for direct MP4). Recording… ';
+ exporting=true;$('exp').disabled=true;playing=true;$('play').innerHTML='&#10074;&#10074; Pause';
+ const rec=new MediaRecorder(cv.captureStream(30),{mimeType:mt,videoBitsPerSecond:14e6}),ch=[];rec.ondataavailable=e=>e.data.size&&ch.push(e.data);
+ const done=new Promise(r=>rec.onstop=r);tNow=0;t0=performance.now();rec.start(250);
+ await new Promise(r=>{const iv=setInterval(()=>{m.textContent=(mp4?'':'WebM mode. ')+'Recording… '+Math.min(100,Math.round(tNow/tot*100))+'%';if(tNow>=tot-.05){clearInterval(iv);r()}},200);
+  // safety: loop() stops advancing at end during export
+  const chk=setInterval(()=>{if(performance.now()-t0>=tot*1000){tNow=tot;clearInterval(chk)}},50)});
+ await new Promise(r=>setTimeout(r,300));rec.stop();await done;exporting=false;$('exp').disabled=false;playing=false;$('play').innerHTML='&#9654; Play';tNow=0;requestAnimationFrame(()=>{});
+ const ext=mp4?'mp4':'webm',a=document.createElement('a');a.href=URL.createObjectURL(new Blob(ch,{type:mt}));a.download='lineup-'+(cfg().short?'shorts':'landscape')+'.'+ext;a.click();m.textContent='Done! Saved as .'+ext}
+ui();
 </script>
 </body>
 </html>
