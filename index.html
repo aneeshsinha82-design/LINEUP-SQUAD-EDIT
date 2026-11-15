@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07130f">
+<title>LINEUP SQUAD EDIT</title>
+<style>
+:root{color-scheme:dark;--bg:#07130f;--panel:#10231b;--line:#284638;--green:#b7f36b;--muted:#9db5a7}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#24452e 0,transparent 55%),var(--bg);color:#f3f7f1;font:15px/1.45 Inter,system-ui,Segoe UI,Arial,sans-serif}
+header{max-width:1180px;margin:auto;padding:26px 22px 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{font-weight:900;letter-spacing:.12em}.brand span{color:var(--green)}.sub{color:var(--muted);font-size:12px;margin-top:4px}
+button,select,input{font:inherit}button{cursor:pointer;border:1px solid var(--line);border-radius:10px;background:#1b3528;color:#f3f7f1;padding:10px 14px}button.primary{background:var(--green);color:#14200d;border-color:var(--green);font-weight:800}button:hover{filter:brightness(1.12)}
+main{max-width:1180px;margin:0 auto;padding:14px 22px 40px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.8fr);gap:18px}
+.panel{background:linear-gradient(145deg,#13281e,#0d1d16);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 14px 40px #0003}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.toolbar label{color:var(--muted);font-size:12px}
+select,input{background:#091710;color:#fff;border:1px solid var(--line);border-radius:9px;padding:10px;min-width:0}
+.pitch{position:relative;overflow:hidden;min-height:600px;border:2px solid #6a9c61;border-radius:12px;background:repeating-linear-gradient(0deg,#1d623c 0,#1d623c 74px,#205f3b 74px,#205f3b 148px);padding:20px 10px}
+.pitch:before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px solid #ffffff70}.pitch:after{content:"";position:absolute;width:140px;height:140px;border:2px solid #ffffff70;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+.boxline{position:absolute;left:25%;right:25%;height:70px;border:2px solid #ffffff70}.boxline.top{top:0;border-top:0}.boxline.bottom{bottom:0;border-bottom:0}
+.positions{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:space-between;min-height:556px;gap:10px}
+.line{display:flex;justify-content:space-evenly;align-items:center;gap:8px}
+.slot{width:84px;min-height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;cursor:pointer}
+.shirt{width:42px;height:42px;border-radius:12px;background:linear-gradient(145deg,#d9ff91,#7eaf40);color:#14220e;display:grid;place-items:center;font-weight:900;border:2px solid #efffd7;box-shadow:0 4px 12px #0006}
+.slot small{font-size:10px;color:#e6f3e6;text-shadow:0 1px 3px #000;font-weight:700}.slot strong{font-size:11px;max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 3px #000}
+h2{font-size:17px;margin:0 0 14px}.muted{color:var(--muted)}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fields label{display:flex;flex-direction:column;gap:5px;color:var(--muted);font-size:12px}.fields .wide{grid-column:1/-1}
+.editor{display:grid;gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.player-list{display:grid;gap:8px;margin-top:16px}.player{display:flex;justify-content:space-between;align-items:center;background:#0a1911;border:1px solid var(--line);padding:9px 10px;border-radius:10px;font-size:13px}
+footer{max-width:1180px;margin:auto;padding:0 22px 24px;color:#718c7c;font-size:11px}
+@media(max-width:800px){main{grid-template-columns:1fr}.pitch{min-height:540px}.positions{min-height:496px}}
+@media(max-width:430px){header{padding:20px 14px 10px}main{padding:10px 14px 28px}.panel{padding:12px}.pitch{padding:14px 2px;min-height:500px}.positions{min-height:456px}.slot{width:66px}.shirt{width:36px;height:36px}.slot strong{max-width:66px;font-size:10px}}
+</style>
+</head>
+<body>
+<header><div><div class="brand">LINEUP <span>SQUAD EDIT</span></div><div class="sub">Build your starting XI • FC-style formation planner</div></div><button id="reset">Reset squad</button></header>
+<main>
+<section class="panel">
+<div class="toolbar"><label for="formation">FORMATION</label><select id="formation"><option>4-3-3 Attack</option><option>4-3-3 Holding</option><option>4-2-3-1</option><option>4-4-2</option><option>3-5-2</option><option>4-1-2-1-2</option></select><button id="clear">Clear names</button></div>
+<div class="pitch"><div class="boxline top"></div><div class="boxline bottom"></div><div class="positions" id="positions"></div></div>
+</section>
+<aside class="panel">
+<h2>Player editor</h2><p class="muted" style="font-size:12px;margin-top:-8px">Select a position on the pitch, then edit the player details.</p>
+<div class="editor">
+<div class="fields">
+<label class="wide">PLAYER NAME<input id="name" maxlength="22" placeholder="Enter player name"></label>
+<label>POSITION<input id="role" maxlength="4" placeholder="e.g. ST"></label>
+<label>OVR<input id="ovr" type="number" min="1" max="150" placeholder="100"></label>
+<label class="wide">CARD / CLUB NOTE<input id="note" maxlength="35" placeholder="Optional card or club"></label>
+</div>
+<div class="actions"><button class="primary" id="save">Save player</button><button id="remove">Remove player</button></div>
+<div class="player-list" id="list"></div>
+<div class="actions"><button id="export">Export lineup JSON</button><button id="import">Import lineup JSON</button><input id="file" type="file" accept="application/json" hidden></div>
+<p class="muted" style="font-size:11px">Your lineup is saved in this browser automatically. Export a JSON backup to move it to another device.</p>
+</div>
+</aside>
+</main>
+<footer>LINEUP SQUAD EDIT · Independent fan-made squad planner. Not affiliated with EA SPORTS FC Mobile.</footer>
+<script>
+const layouts={
+"4-3-3 Attack":[["LW","ST","RW"],["CAM"],["CM","CM"],["LB","CB","CB","RB"],["GK"]],
+"4-3-3 Holding":[["LW","ST","RW"],["CM","CDM","CM"],["LB","CB","CB","RB"],["GK"]],
+"4-2-3-1":[["ST"],["LAM","CAM","RAM"],["CDM","CDM"],["LB","CB","CB","RB"],["GK"]],
+"4-4-2":[["ST","ST"],["LM","CM","CM","RM"],["LB","CB","CB","RB"],["GK"]],
+"3-5-2":[["ST","ST"],["LM","CM","CAM","CM","RM"],["CB","CB","CB"],["GK"]],
+"4-1-2-1-2":[["ST","ST"],["CAM"],["CM","CM"],["CDM"],["LB","CB","CB","RB"],["GK"]]
+};
+const defaults={};let squad=JSON.parse(localStorage.getItem("lineup-squad-edit")||"null")||{};let selected=null;
+const $=id=>document.getElementById(id);
+function positions(){const formation=$("formation").value;const data=layouts[formation];$("positions").innerHTML="";let idx=0;data.forEach(row=>{const el=document.createElement("div");el.className="line";row.forEach(role=>{const id=formation+"-"+idx++;const p=squad[id]||{name:"",role,ovr:"",note:""};const slot=document.createElement("div");slot.className="slot";slot.innerHTML='<div class="shirt">'+(p.ovr||role)+'</div><small>'+role+'</small><strong>'+(p.name||"Tap to edit")+'</strong>';slot.addEventListener("click",()=>select(id,role));el.appendChild(slot)});$("positions").appendChild(el)});renderList()}
+function select(id,role){selected=id;const p=squad[id]||{name:"",role,ovr:"",note:""};$("name").value=p.name;$("role").value=p.role||role;$("ovr").value=p.ovr;$("note").value=p.note;$("name").focus()}
+function save(){if(!selected){alert("Select a position on the pitch first.");return}const name=$("name").value.trim();squad[selected]={name,role:$("role").value.trim().toUpperCase()||"POS",ovr:$("ovr").value,note:$("note").value.trim()};persist();positions()}
+function persist(){localStorage.setItem("lineup-squad-edit",JSON.stringify(squad))}
+function renderList(){const entries=Object.entries(squad).filter(([,p])=>p.name);$("list").innerHTML=entries.length?entries.map(([id,p])=>'<div class="player"><span><b>'+(p.name.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])))+'</b> · '+p.role+' '+(p.ovr?'· OVR '+p.ovr:'')+'</span><button data-id="'+id+'">Edit</button></div>').join(""):'<p class="muted" style="font-size:12px">No players added yet.</p>';$("list").querySelectorAll("button").forEach(b=>b.onclick=()=>select(b.dataset.id,(squad[b.dataset.id]||{}).role||""))}
+$("save").onclick=save;$("formation").onchange=()=>{selected=null;positions()};$("remove").onclick=()=>{if(selected){delete squad[selected];persist();positions();$("name").value=$("role").value=$("ovr").value=$("note").value=""}};
+$("clear").onclick=()=>{squad={};selected=null;persist();positions()};$("reset").onclick=()=>{if(confirm("Reset the entire squad?")){$("formation").value="4-3-3 Attack";squad={};selected=null;persist();positions()}};
+$("export").onclick=()=>{const blob=new Blob([JSON.stringify({formation:$("formation").value,squad},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="lineup-squad.json";a.click();URL.revokeObjectURL(a.href)};
+$("import").onclick=()=>$("file").click();$("file").onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());squad=d.squad||{};if(layouts[d.formation])$("formation").value=d.formation;persist();positions()}catch{alert("That JSON file could not be imported.")}e.target.value=""};
+positions();
+</script>
+</body></html>
