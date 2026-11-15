@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lineup Reel Maker</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.js"></script>
 <style>
 :root{color-scheme:dark;--bg:#0a0a0a;--panel:#161616;--line:#2c2c2c;--fg:#f2f2f2;--mut:#9a9a9a;--acc:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:inherit}html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -43,9 +44,11 @@ label.s{display:flex;flex-direction:column;gap:3px;color:var(--mut);font-size:12
 <label class="s">Hold at end (s)<input type="number" id="hold" value="1.5" min="0" max="10" step="0.1" style="width:90px"></label>
 </div>
 <div class="row">
-<label class="s">Style<select id="sty"><option value="bw">Black &amp; white</option><option value="col">Original colours</option></select></label>
+<label class="s">Style<select id="sty"><option value="c2b">Colour, then turn B&amp;W</option><option value="bw">Always black &amp; white</option><option value="col">Always colour</option></select></label>
 <label class="s">Background<select id="bgc"><option value="#000">Black</option><option value="#fff">White</option><option value="#0a1a0f">Dark green</option></select></label>
 <label class="s">Overlap<select id="ov"><option value="0.15">Light</option><option value="0.3" selected>Medium</option><option value="0.45">Heavy</option></select></label>
+<label class="s">Turn B&amp;W<select id="tall"><option value="each">Each, after it lands</option><option value="all">All together, after last lands</option></select></label>
+<label class="s">B&amp;W delay (s)<input type="number" id="gd" value="0.3" min="0" max="5" step="0.1" style="width:90px"></label>
 </div>
 <div class="row"><button id="exp" class="p">&#11015; Export MP4</button><span class="hint" id="info"></span></div>
 <div id="msg"></div>
@@ -62,7 +65,7 @@ const cv=document.getElementById('cv'),cx=cv.getContext('2d'),$=id=>document.get
 const ENT=0.55,EXI=0.45,FONT='"Cinzel Decorative",Georgia,serif';
 let topics=[{name:'Attackers',items:[]}],playing=false,t0=0,tNow=0,exporting=false;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const cfg=()=>({stag:+$('stag').value||.7,hold:+$('hold').value||0,bw:$('sty').value=='bw',bg:$('bgc').value,ov:+$('ov').value,short:$('fmt').value=='short'});
+const cfg=()=>({stag:+$('stag').value||.7,hold:+$('hold').value||0,mode:$('sty').value,gd:+$('gd').value||0,all:$('tall').value=='all',bg:$('bgc').value,ov:+$('ov').value,short:$('fmt').value=='short'});
 function sched(){const c=cfg();let s=0;const a=[];topics.forEach(tp=>{if(!tp.items.length)return;const d=tp.items.length*c.stag+ENT+c.hold+EXI;a.push({tp,s,d});s+=d});return{a,total:s}}
 function addFiles(tp,files){[...files].forEach(f=>{const url=URL.createObjectURL(f),it={name:f.name,url,vid:f.type.startsWith('video')};
  if(it.vid){const v=document.createElement('video');v.muted=true;v.loop=true;v.playsInline=true;v.src=url;v.onloadedmetadata=()=>{it.w=v.videoWidth;it.h=v.videoHeight;v.play().catch(()=>{});ui()};it.el=v}
@@ -97,18 +100,19 @@ function draw(t){const W=cv.width,H=cv.height,c=cfg();cx.globalAlpha=1;cx.filter
  let x=(W-tot)/2;const base=H*(c.short?.6:.68),ex=clamp((lt-(seg.d-EXI))/EXI,0,1);
  its.forEach((it,i)=>{const w=ws[i],h=hs[i],p=clamp((lt-i*c.stag)/ENT,0,1),e=1-Math.pow(1-p,3),dir=i%2?1:-1;
   if(p>0){let px=x+dir*(1-e)*W*.7+dir*ex*ex*W*.5;const a=p*(1-ex),bl=(1-e)*26*W/1920+ex*10;
-   cx.save();cx.globalAlpha=a;cx.filter=(c.bw?'grayscale(1) contrast(1.1) ':'')+(bl>.3?'blur('+bl.toFixed(1)+'px)':'');
+   cx.save();cx.globalAlpha=a;let g=0;if(c.mode=='bw')g=1;else if(c.mode=='c2b'){const land=(c.all?(n-1)*c.stag:i*c.stag)+ENT;g=clamp((lt-land-c.gd)/.7,0,1)}
+   cx.filter='grayscale('+g.toFixed(3)+') contrast('+(1+.1*g).toFixed(3)+') '+(bl>.3?'blur('+bl.toFixed(1)+'px)':'');
    try{cx.drawImage(it.el,px,base-h,w,h)}catch(_){}cx.restore()}
   x+=w*k});
  cx.filter='none';const ta=clamp(lt/.25,0,1)*(1-ex);drawTitle(seg.tp.name,W,H,c,ta,lt)}
 function loop(ts){if(playing){tNow=(ts-t0)/1000;const tot=sched().total;if(tNow>=tot){if(exporting)tNow=tot;else{tNow=0;t0=ts}}
   $('seek').value=tot?tNow/tot*1000:0}
- draw(tNow);$('tm').textContent=tNow.toFixed(1)+'s';requestAnimationFrame(loop)}
+ if(!exporting)draw(tNow);$('tm').textContent=tNow.toFixed(1)+'s';requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 $('play').onclick=()=>{playing=!playing;$('play').innerHTML=playing?'&#10074;&#10074; Pause':'&#9654; Play';if(playing)t0=performance.now()-tNow*1000};
 $('seek').oninput=e=>{tNow=e.target.value/1000*sched().total;if(playing)t0=performance.now()-tNow*1000};
-['fmt','stag','hold','sty','bgc','ov'].forEach(id=>$(id).onchange=()=>{setSize();ui()});
-$('exp').onclick=async()=>{const m=$('msg'),tot=sched().total;if(!tot){m.textContent='Add some characters first.';return}
+['fmt','stag','hold','sty','bgc','ov','gd','tall'].forEach(id=>$(id).onchange=()=>{setSize();ui()});
+async function recExport(){const m=$('msg'),tot=sched().total;if(!tot){m.textContent='Add some characters first.';return}
  if(!window.MediaRecorder){m.textContent='Your browser cannot record video. Use Chrome or Edge on desktop.';return}
  await document.fonts.load('700 40px "Cinzel Decorative"').catch(()=>{});
  const types=['video/mp4;codecs=avc1.640028','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm'],mt=types.find(t=>MediaRecorder.isTypeSupported(t));
@@ -122,6 +126,28 @@ $('exp').onclick=async()=>{const m=$('msg'),tot=sched().total;if(!tot){m.textCon
   const chk=setInterval(()=>{if(performance.now()-t0>=tot*1000){tNow=tot;clearInterval(chk)}},50)});
  await new Promise(r=>setTimeout(r,300));rec.stop();await done;exporting=false;$('exp').disabled=false;playing=false;$('play').innerHTML='&#9654; Play';tNow=0;requestAnimationFrame(()=>{});
  const ext=mp4?'mp4':'webm',a=document.createElement('a');a.href=URL.createObjectURL(new Blob(ch,{type:mt}));a.download='lineup-'+(cfg().short?'shorts':'landscape')+'.'+ext;a.click();m.textContent='Done! Saved as .'+ext}
+const seekV=(v,t)=>new Promise(r=>{const nt=t%(v.duration||1);if(Math.abs(v.currentTime-nt)<.002)return r();const h=()=>{v.removeEventListener('seeked',h);r()};v.addEventListener('seeked',h);v.currentTime=nt;setTimeout(r,600)});
+$('exp').onclick=async()=>{const m=$('msg'),s=sched(),tot=s.total;if(!tot){m.textContent='Add some characters first.';return}
+ if(!(window.VideoEncoder&&window.VideoFrame&&window.Mp4Muxer)){m.textContent='This browser has no MP4 encoder - use the latest Chrome, Edge or Safari. Trying fallback…';return recExport()}
+ await document.fonts.load('700 40px "Cinzel Decorative"').catch(()=>{});
+ const W=cv.width,H=cv.height,FPS=30;let ec=null;
+ for(const codec of ['avc1.640033','avc1.640028','avc1.4d0028','avc1.42001f']){const o={codec,width:W,height:H,bitrate:14e6,framerate:FPS};try{if((await VideoEncoder.isConfigSupported(o)).supported){ec=o;break}}catch(_){}}
+ if(!ec){m.textContent='H.264 encoder not available here. Trying fallback…';return recExport()}
+ exporting=true;playing=false;$('play').innerHTML='&#9654; Play';$('exp').disabled=true;
+ const mux=new Mp4Muxer.Muxer({target:new Mp4Muxer.ArrayBufferTarget(),video:{codec:'avc',width:W,height:H},fastStart:'in-memory'});
+ let err=null;const enc=new VideoEncoder({output:(c,md)=>mux.addVideoChunk(c,md),error:e=>err=e});enc.configure(ec);
+ const all=[...new Set(topics.flatMap(tp=>tp.items.filter(i=>i.vid)))];all.forEach(i=>i.el.pause());
+ const N=Math.ceil(tot*FPS);
+ try{for(let f=0;f<=N&&!err;f++){const tt=f/FPS,g=s.a.find(x=>tt>=x.s&&tt<x.s+x.d)||s.a[s.a.length-1];
+  await Promise.all(g.tp.items.filter(i=>i.vid&&i.w).map(i=>seekV(i.el,tt)));
+  draw(tt);const fr=new VideoFrame(cv,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});
+  enc.encode(fr,{keyFrame:f%FPS==0});fr.close();
+  while(enc.encodeQueueSize>8)await new Promise(r=>setTimeout(r,5));
+  if(f%3==0){m.textContent='Rendering MP4… '+Math.round(f/N*100)+'%';$('seek').value=f/N*1000;await new Promise(r=>setTimeout(r))}}
+  if(err)throw err;await enc.flush();mux.finalize();
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([mux.target.buffer],{type:'video/mp4'}));a.download='lineup-'+(cfg().short?'shorts':'landscape')+'.mp4';a.click();m.textContent='Done! Saved as MP4 (H.264).';
+ }catch(e){m.textContent='Export failed: '+(e&&e.message||e)}
+ finally{exporting=false;$('exp').disabled=false;all.forEach(i=>i.el.play().catch(()=>{}))}};
 ui();
 </script>
 </body>
